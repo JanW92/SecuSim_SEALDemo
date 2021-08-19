@@ -1,0 +1,13 @@
+﻿  1_bfv_basics.cpp
+  2_encoders.cpp
+  3_levels.cpp
+  4_ckks_basics.cpp
+  5_rotation.cpp
+  6_serialization.cpp
+  7_performance.cpp
+  examples.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 1785 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  SEAL_Examples.vcxproj -> D:\Workspace\SecuSim_SEALDemo\x64\Release\SEAL_Examples.exe
