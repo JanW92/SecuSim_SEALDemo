@@ -1,7 +1,11 @@
 
 void InvestigateGaloisKeySize();
+void InvestigateRotationSequentailOperation();
+void InvestigateMVPerformance();
 
 int main()
 {
-	InvestigateGaloisKeySize();
+	//InvestigateGaloisKeySize();
+	//InvestigateRotationSequentailOperation();
+	InvestigateMVPerformance();
 }

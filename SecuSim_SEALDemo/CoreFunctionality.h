@@ -76,6 +76,56 @@ inline void print_parameters(const seal::SEALContext & context)
     std::cout << "\\" << std::endl;
 }
 
+inline string get_parameters(const seal::SEALContext& context)
+{
+    string parameter;
+    auto& context_data = *context.key_context_data();
+
+    /*
+    Which scheme are we using?
+    */
+    std::string scheme_name;
+    switch (context_data.parms().scheme())
+    {
+    case seal::scheme_type::bfv:
+        scheme_name = "BFV";
+        break;
+    case seal::scheme_type::ckks:
+        scheme_name = "CKKS";
+        break;
+    default:
+        throw std::invalid_argument("unsupported scheme");
+    }
+    parameter= "/\n";
+    parameter += "| Encryption parameters :\n" ;
+    parameter += "|   scheme: " + scheme_name + "\n";
+    parameter += "|   poly_modulus_degree: " + to_string(context_data.parms().poly_modulus_degree()) + "\n" ;
+
+    /*
+    Print the size of the true (product) coefficient modulus.
+    */
+    parameter += "|   coeff_modulus size: ";
+    parameter += to_string(context_data.total_coeff_modulus_bit_count()) + " (";
+    auto coeff_modulus = context_data.parms().coeff_modulus();
+    std::size_t coeff_modulus_size = coeff_modulus.size();
+    for (std::size_t i = 0; i < coeff_modulus_size - 1; i++)
+    {
+        parameter += to_string(coeff_modulus[i].bit_count()) + " + ";
+    }
+    parameter += to_string(coeff_modulus.back().bit_count());
+    parameter += ") bits\n";
+
+    /*
+    For the BFV scheme print the plain_modulus parameter.
+    */
+    if (context_data.parms().scheme() == seal::scheme_type::bfv)
+    {
+        parameter += "|   plain_modulus: " + to_string(context_data.parms().plain_modulus().value()) + "\n";
+    }
+
+    parameter += "\\\n";
+    return parameter; 
+}
 
 
 
@@ -432,10 +482,7 @@ inline double get_mse(vector<double> actualResult, vector<double> expectedResult
     return mseValue;
 }
 
-
-
 //Test Phase
-
 inline void get_max_error_norm_largeValues(vector<double> actualResult, vector<double> expectedResult, int dimension)
 {
     vector<float> error(dimension);
@@ -719,4 +766,16 @@ inline Ciphertext Linear_Transform_Cipher_Sequential_Dense(Ciphertext ct, vector
     }
 
     return cipher_result_prime[size - 1];
+}
+
+
+
+//Filewriter
+
+inline void SaveInFile(string completePath, string content)
+{
+    std::ofstream myfile;
+    myfile.open(completePath, std::ios::app);
+    myfile << content;
+    myfile.close();
 }
