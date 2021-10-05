@@ -8,12 +8,15 @@ vector<double>  MatrixVectorMultiplication(vector<vector<double>> matrix, vector
 
 void InvestigateMVPerformance()
 {
+
     omp_set_num_threads(4);
     string fileName = "SecuSim_SEALMeasurement.txt";
     string path = "D:\\PerformanceAnalyse\\";
     EncryptionParameters parms(scheme_type::ckks);
 
-    //Maximum  poly_modulus_degree
+    /*
+    *   Maximum  poly_modulus_degree
+    */
     //size_t poly_modulus_degree = 8192;
     size_t poly_modulus_degree = 32768;
 
@@ -44,12 +47,16 @@ void InvestigateMVPerformance()
 
     parms.set_poly_modulus_degree(poly_modulus_degree);
 
-    //Amount of primes between the first and last are limiting the amount of operations! In this case 19 operations are possible.
+    /*
+        Amount of primes between the firstand last are limiting the amount of operations!In this case 19 operations are possible.
+    */
     //parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 60, 40, 40, 60 }));
     parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 60, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 60 }));
     const int operations = 18;
 
-    //Setup SEAL objects
+    /*
+        Setup SEAL objects
+    */
     SEALContext context(parms);
     print_parameters(context);
     string contextAsString = get_parameters(context);
@@ -68,13 +75,16 @@ void InvestigateMVPerformance()
     Evaluator evaluator(context);
     CKKSEncoder encoder(context);
 
-    //Reduced galois key that supports rotations by one in the leftern direction. For details see function: InvestigateGaloisKeySize
+    /*
+        Reduced galois key that supports rotations by one in the leftern direction.For details see function : InvestigateGaloisKeySize
+     */
     vector<int> rotationVect{ 1 };
     GaloisKeys gal_keys;
     keygen.create_galois_keys(rotationVect, gal_keys);
 
-    //Creation of vectors. Their size is predertermined by the poly_modulus_degree value. Since the ckks scheme is used and it uses only real numbers the vector size is calculated as followed:
-    //slot_count = poly_modulus_degree / 2
+    /*
+        Creation of vectors.Their size is predertermined by the poly_modulus_degree value.Since the ckks scheme is usedand it uses only real numbers the vector size is calculated as followed :
+    */
     size_t slot_count = encoder.slot_count();
 
     vector<double> temp_solution;
@@ -82,7 +92,10 @@ void InvestigateMVPerformance()
     vector<double> errorResult(slot_count);
 
     auto start_matrixCreation = chrono::high_resolution_clock::now();
-    //Creation MAtrix
+
+    /*
+    * Creation Matrix
+    */
     vector<vector<double>> curlDummy(slot_count, vector<double>(slot_count));
     vector<vector<double>> matrixDia(slot_count, vector<double>(slot_count));
 
@@ -100,6 +113,11 @@ void InvestigateMVPerformance()
     curlDummy.shrink_to_fit();
 
     auto after_matrixCreation = chrono::high_resolution_clock::now();
+
+    /*
+        Vector initialization
+    */
+
     double value = 2.01234567890123456789;
 
     for (int i = 0; i < slot_count; i++)
@@ -108,19 +126,30 @@ void InvestigateMVPerformance()
         solution[i] = 0.;
     }
 
+    /*
+        Calculate expected result after one matrix-vector multiplication
+    */
     auto before_PlainMV = chrono::high_resolution_clock::now();
     vector<double> expectedSolution = MatrixVectorMultiplication(matrixDia, fieldDummy);
     auto after_PlainMV = chrono::high_resolution_clock::now();
 
+    /*
+        Canonial embedding of the data vectors
+    */
     Plaintext p_Field, p_Temp, p_Solution;
     encoder.encode(fieldDummy, scale, p_Field);
     encoder.encode(solution, scale, p_Solution);
 
+
+    /*
+        Encryption
+    */
     auto before_Encryption = chrono::high_resolution_clock::now();
     vector<Ciphertext> c_Matrix(slot_count);
     Ciphertext c_Field, c_Solution, c_NullVector;
     encryptor.encrypt(p_Field, c_Field);
     encryptor.encrypt(p_Solution, c_Solution);
+    /*Result of multiplication is going to be added with c_Solution. Therefore the mod has to be adjusted.*/
     evaluator.mod_switch_to_next_inplace(c_Solution);
     c_NullVector = c_Solution;
 
@@ -134,7 +163,6 @@ void InvestigateMVPerformance()
         }
 //    }
 
-    
     //decryptor.decrypt(c_Matrix[0], p_Temp);
     //encoder.decode(p_Temp, solution);
 
@@ -147,11 +175,13 @@ void InvestigateMVPerformance()
     Ciphertext c_Temp;
     auto after_Encryption = chrono::high_resolution_clock::now();
 
+    /*
+        Matrix-Vector multiplikation
+    */
+
     //#pragma omp parallel
     //{
-    //    #pragma omp for
-
-
+    //  #pragma omp for
         for (int j = 0; j < operations; j++)
         {
             for (int i = 0; i < c_Matrix.size(); i++)
@@ -161,25 +191,26 @@ void InvestigateMVPerformance()
                     evaluator.relinearize_inplace(c_Temp, relin_keys);
                     evaluator.rescale_to_next_inplace(c_Temp);
 
-                    decryptor.decrypt(c_Temp, p_Temp);
-                    encoder.decode(p_Temp, temp_solution);
+                    //decryptor.decrypt(c_Temp, p_Temp);
+                    //encoder.decode(p_Temp, temp_solution);
 
                     c_Solution.scale() = scale;
                     c_Temp.scale() = scale;
                     evaluator.add_inplace(c_Solution, c_Temp);
 
-                    decryptor.decrypt(c_Solution, p_Temp);
-                    encoder.decode(p_Temp, temp_solution);
+                    //decryptor.decrypt(c_Solution, p_Temp);
+                    //encoder.decode(p_Temp, temp_solution);
                     evaluator.rotate_vector_inplace(c_Field, 1, gal_keys);
 
                     evaluator.mod_switch_to_next_inplace(c_Matrix[i]);
             }
             auto after_EncryptMV = chrono::high_resolution_clock::now();
-            //Compare the results
+            /*
+                Compare the results
+            */
             c_Field = c_Solution;
             decryptor.decrypt(c_Field, p_Temp);
             encoder.decode(p_Temp, temp_solution);
-            std::cout << j << ". rotation:\n";
             get_max_error_norm(temp_solution, expectedSolution, expectedSolution.size(), errorResult);
 
 
@@ -193,8 +224,15 @@ void InvestigateMVPerformance()
                 + "Time for plain MV: " + to_string(t2.count()) + " s\n"
                 + "Time for encryption: " + to_string(t3.count()) + " s\n"
                 + "Time for encrypted MV: " + to_string(t4.count()) + " s\n";
+            
+            std::cout << j << ". rotation:\n";
             std::cout << output;
+            
             SaveInFile(path + fileName, output);
+            
+            /*
+                Preperations for the next operation: Update expected result and set c_Solution back to a zero filled vector with reduced mod
+            */
             expectedSolution = MatrixVectorMultiplication(matrixDia, expectedSolution);
             evaluator.mod_switch_to_next_inplace(c_NullVector);
             c_Solution = c_NullVector;

@@ -106,7 +106,6 @@ void InvestigateGaloisKeySize()
 
 }
 
-
 void InvestigateRotationSequentialOperation()
 {
     EncryptionParameters parms(scheme_type::ckks);

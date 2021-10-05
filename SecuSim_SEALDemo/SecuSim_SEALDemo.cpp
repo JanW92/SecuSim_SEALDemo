@@ -1,6 +1,6 @@
 
 void InvestigateGaloisKeySize();
-void InvestigateRotationSequentailOperation();
+void InvestigateRotationSequentialOperation();
 void InvestigateMVPerformance();
 
 int main()
