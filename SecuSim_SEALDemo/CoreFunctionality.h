@@ -268,7 +268,7 @@ inline void print_full_vector(vector<T> vec, int print_size, int precision = 3)
 
 // Gets a diagonal from a matrix U
 template <typename T>
-inline vector<T> get_diagonal(int position, vector<vector<T>> U)
+inline vector<T> get_diagonal(int position, vector<vector<T>> &U)
 {
 
     vector<T> diagonal(U.size());
@@ -448,6 +448,19 @@ inline void get_max_error_norm(vector<double> actualResult, vector<double> expec
     auto maxError = max_element(errordResult.begin(), errordResult.end());
     double indx = distance(errordResult.begin(), maxError);
     cout << "\nMax Error Norm = " << *maxError<< " At Index: "<<indx <<"\n";
+}
+
+inline double get_max_error_norm_value(vector<double> actualResult, vector<double> expectedResult, int dimension, vector<double> errordResult)
+{
+    for (int i = 0; i < dimension; i++)
+    {
+        errordResult[i] = abs(expectedResult[i] - actualResult[i]);
+    }
+
+    // Find the maximum element in error vector
+    auto maxError = max_element(errordResult.begin(), errordResult.end());
+    double indx = distance(errordResult.begin(), maxError);
+    return *maxError;
 }
 
 //Normalised Max Error Norm
