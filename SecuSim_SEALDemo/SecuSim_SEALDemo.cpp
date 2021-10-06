@@ -7,5 +7,5 @@ int main()
 {
 	//InvestigateGaloisKeySize();
 	//InvestigateRotationSequentailOperation();
-	InvestigateMVPerformance();
+		InvestigateMVPerformance();
 }

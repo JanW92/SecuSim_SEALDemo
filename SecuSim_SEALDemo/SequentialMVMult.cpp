@@ -267,7 +267,7 @@ void InvestigateMVPerformance()
         /*
             Performance measured in Mega Cells per Second [MCells/s]
         */
-        double performance = (nodes * operations) / (totalTime / 360 * pow(10, 6));
+        double performance = (nodes * operations) / (totalTime * pow(10, 6));
         output += "Measured simulation performance: " + to_string(performance) + " MCells/sec";
         std::cout << output;
         SaveInFile(path + fileName, output);
