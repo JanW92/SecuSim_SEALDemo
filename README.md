@@ -21,3 +21,8 @@ Therefore, this software project can be used to analyse the suitability of upcom
 ## Dependencies
 
 * SEAL VERSION 3.6.6
+
+## References
+
+* SEAL project: https://github.com/microsoft/SEAL
+* Implementation of matrix vector multiplication: https://github.com/MarwanNour/SEAL-FYP-Logistic-Regression
