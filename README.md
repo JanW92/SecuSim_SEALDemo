@@ -9,8 +9,8 @@ Most cloud providers ensure a certain degree of security, which might not be suf
 such that the confidential data never exist unencrypted on the cloud. One possible way to achieve this is the technology of Homomorphic Encryption (HE). This technology makes it possible
 to perform mathematical operations on encrypted data and obtain the result (after decryption that is) one would get if the operation would have been performed on the unencrypted data.
 The different HE schemas support different types of mathematical operations and different number of sequential operations. The encryption comes with a memory overhead that is reduced if vectors of data
-are encrypted. For that reason, two libraries were investigated, the SEAL and HEAAN library (link is following). Both libraries support fixed point arithmetic, which requires special handling if it shall be used for a simulation.
-With this code the memory overhead of the encrypted data and the performance of a matrix-vector multiplication were analysed. It was planned to implement the encryption into the matrix based FIT TD solver (link is following), which 
+are encrypted. For that reason, two libraries were investigated, the SEAL and HEAAN library (https://github.com/SanJomyi/SecuSim_HEAANDemo). Both libraries support fixed point arithmetic, which requires special handling if it shall be used for a simulation.
+With this code the memory overhead of the encrypted data and the performance of a matrix-vector multiplication were analysed. It was planned to implement the encryption into the matrix based FIT TD solver (https://github.com/SanJomyi/EMW_FIT_Solver), which 
 is being developed for the OpenSource simulation platform OpenTwin (link is following).
 
 
